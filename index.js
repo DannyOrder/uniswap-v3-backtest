@@ -10,11 +10,15 @@ const DateByDaysAgo = (days, endDate = null) => {
 // Required = Pool ID, investmentAmount (token0 by default), minRange, maxRange, options = { days, protocol, baseToken }
 
 export const uniswapStrategyBacktest = async ( pool, investmentAmount, minRange, maxRange, options = {}) => {
-
-  const opt = {days: 30, protocol: 0, priceToken: 0, period: "hourly", ...options };
+  const opt = {days: 30, protocol: 2, priceToken: 0, period: "hourly", ...options };
+  const theProtocol = opt.protocol;
+  //console.log('theProtocol@14:', theProtocol);
 
   if (pool) {
-    const poolData = await poolById(pool);
+    //const poolData = await poolById(pool);
+    const poolData = await poolById(pool, theProtocol);
+    //console.log('poolData@18:', poolData);  // Add log
+    //console.log('pool@17:', pool);  // Add log
     let { startTimestamp, endTimestamp, days } = opt;
     if (!endTimestamp) {
       endTimestamp = Math.floor(Date.now() / 1000);
@@ -22,10 +26,12 @@ export const uniswapStrategyBacktest = async ( pool, investmentAmount, minRange,
     if (!startTimestamp && days) {
       startTimestamp = DateByDaysAgo(days, endTimestamp);
     }
-    const hourlyPriceData = await getPoolHourData(pool, startTimestamp, endTimestamp, opt.protocol);
-    
+    const hourlyPriceData = await getPoolHourData(pool, startTimestamp, endTimestamp, theProtocol);
+    //console.log('poolData@27:', poolData);  // Add log
+    //console.log('hourlyPriceData:', hourlyPriceData);  // Add log
+    //console.log('hourlyPriceData.length=', hourlyPriceData.length);  // Add log
     if (poolData && hourlyPriceData && hourlyPriceData.length > 0) {
-
+      //console.log('Index_Data exists and will be processed.');  // Add log
       const backtestData = hourlyPriceData.reverse();
       const entryPrice = opt.priceToken === 1 ?  1 / backtestData[0].close : backtestData[0].close
       const tokens = tokensForStrategy(minRange, maxRange, investmentAmount, entryPrice, poolData.token1.decimals - poolData.token0.decimals);
@@ -34,10 +40,13 @@ export const uniswapStrategyBacktest = async ( pool, investmentAmount, minRange,
       const hourlyBacktest = calcFees(backtestData, poolData, opt.priceToken, liquidity, unbLiquidity, investmentAmount, minRange, maxRange);
       return opt.period === 'daily' ? pivotFeeData(hourlyBacktest, opt.priceToken, investmentAmount) : hourlyBacktest;
     }
+    else {
+      //console.log('Data does not exist or is empty.');  // Add log
+    }
   }
 }
 
-export const hourlyPoolData = (pool, days = 30, protocol = 0) => {
+export const hourlyPoolData = (pool, days = 30, protocol = protocol) => {
   getPoolHourData(pool, DateByDaysAgo(days), protocol).then(d => {
     if ( d && d.length ) { return d }
     else { return null }

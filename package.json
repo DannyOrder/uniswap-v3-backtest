@@ -26,6 +26,8 @@
   },
   "homepage": "https://github.com/DefiLab-xyz/uniswap-v3-backtest#readme",
   "dependencies": {
-    "node-fetch": "^3.2.4"
+    "json2csv": "^6.0.0-alpha.2",
+    "node-fetch": "^3.2.4",
+    "uniswap-v3-backtest": "^1.1.2"
   }
 }
