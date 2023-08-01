@@ -3,7 +3,8 @@ import { logWithBase, round, sumArray, parsePrice } from "./numbers.mjs";
 // calculate the amount of fees earned in 1 period by 1 unit of unbounded liquidity //
 // fg0 represents the amount of token 0, fg1 represents the amount of token1 //
 export const calcUnboundedFees = (globalfee0, prevGlobalfee0, globalfee1, prevGlobalfee1, poolSelected) => {
-
+  //console.log('backtest.mjs globalfee0, prevGlobalfee0, globalfee1, prevGlobalfee1:', globalfee0, prevGlobalfee0, globalfee1, prevGlobalfee1);
+  //console.log('backtest.mjs poolSelected:', poolSelected);
   const fg0_0 = ((parseInt(globalfee0)) / Math.pow(2, 128)) / (Math.pow(10, poolSelected.token0.decimals));
   const fg0_1 = (((parseInt(prevGlobalfee0))) / Math.pow(2, 128)) / (Math.pow(10, poolSelected.token0.decimals));
 
@@ -12,12 +13,13 @@ export const calcUnboundedFees = (globalfee0, prevGlobalfee0, globalfee1, prevGl
 
   const fg0 = (fg0_0 - fg0_1); // fee of token 0 earned in 1 period by 1 unit of unbounded liquidity
   const fg1 = (fg1_0 - fg1_1); // fee of token 1 earned in 1 period by 1 unit of unbounded liquidity
+  
 
   return [fg0, fg1];
 }
 
 // calculate the liquidity tick at a specified price 
-export const getTickFromPrice = (price, pool, baseSelected = 0) => {
+export const getTickFromPrice = (price, pool, baseSelected = 0) => {  
   const decimal0 = baseSelected && baseSelected === 1 ? parseInt(pool.token1.decimals) : parseInt(pool.token0.decimals);
   const decimal1 = baseSelected && baseSelected === 1 ? parseInt(pool.token0.decimals) : parseInt(pool.token1.decimals);
   const valToLog = parseFloat(price) * Math.pow(10, (decimal0 - decimal1));
@@ -28,7 +30,7 @@ export const getTickFromPrice = (price, pool, baseSelected = 0) => {
 
 // estimate the percentage of active liquidity for 1 period for a strategy based on min max bounds 
 // low and high are the period's candle low / high values
-export const activeLiquidityForCandle = (min, max, low, high) => {
+export const activeLiquidityForCandle = (min, max, low, high) => {  
 
   const divider = (high - low) !== 0 ? (high - low) : 1;
   const ratioTrue = (high - low) !== 0 ? (Math.min(max, high) - Math.max(min, low)) / divider : 1;
@@ -39,7 +41,7 @@ export const activeLiquidityForCandle = (min, max, low, high) => {
 }
 
 // Calculate the number of tokens for a Strategy at a specific amount of liquidity & price
-export const tokensFromLiquidity = (price, low, high, liquidity, decimal0, decimal1) => {
+export const tokensFromLiquidity = (price, low, high, liquidity, decimal0, decimal1) => {  
 
   const decimal = decimal1 - decimal0;
   const lowHigh = [(Math.sqrt(low * Math.pow(10, decimal))) * Math.pow(2, 96), (Math.sqrt(high * Math.pow(10, decimal))) * Math.pow(2, 96)];
@@ -66,7 +68,7 @@ export const tokensFromLiquidity = (price, low, high, liquidity, decimal0, decim
 }
 
 // Calculate the number of Tokens a strategy owns at a specific price 
-export const tokensForStrategy = (minRange, maxRange, investment, price, decimal) => {
+export const tokensForStrategy = (minRange, maxRange, investment, price, decimal) => {  
 
   const sqrtPrice = Math.sqrt(price * (Math.pow(10, decimal)));
   const sqrtLow = Math.sqrt(minRange * (Math.pow(10, decimal)));
@@ -122,6 +124,7 @@ export const liquidityForStrategy = (price, low, high, tokens0, tokens1, decimal
 
 // Calculate estimated fees
 export const calcFees = (data, pool, priceToken, liquidity, unboundedLiquidity, investment, min, max) => {
+  
 
   return data.map((d, i) => {
 
